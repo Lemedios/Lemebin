@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡易Pastebin</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        textarea { width: 90%; height: 200px; margin: 10px 0; }
+        button { padding: 10px 20px; cursor: pointer; }
+        input { width: 80%; padding: 5px; }
+    </style>
+</head>
+<body>
+    <script>
+        function saveText() {
+            let text = document.getElementById("textInput").value;
+            if (!text) {
+                alert("テキストを入力してください。");
+                return;
+            }
+            let id = Date.now().toString(36);
+            localStorage.setItem("paste_" + id, text);
+            let url = window.location.origin + window.location.pathname + "?id=" + id;
+            document.getElementById("shareUrl").value = url;
+        }
+
+        function copyUrl() {
+            let urlField = document.getElementById("shareUrl");
+            urlField.select();
+            document.execCommand("copy");
+            alert("URLをコピーしました！");
+        }
+
+        function loadText() {
+            let params = new URLSearchParams(window.location.search);
+            let id = params.get("id");
+            if (id) {
+                let text = localStorage.getItem("paste_" + id);
+                if (text) {
+                    document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${text}</pre>`;
+                } else {
+                    document.body.innerHTML = "<p>テキストが見つかりません。</p>";
+                }
+            }
+        }
+
+        window.onload = function() {
+            let params = new URLSearchParams(window.location.search);
+            if (params.has("id")) {
+                loadText();
+            } else {
+                document.body.innerHTML = `
+                    <h1>簡易Pastebin</h1>
+                    <textarea id="textInput" placeholder="ここにテキストを入力"></textarea>
+                    <br>
+                    <button onclick="saveText()">共有URLを生成</button>
+                    <br>
+                    <input type="text" id="shareUrl" readonly>
+                    <button onclick="copyUrl()">コピー</button>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
